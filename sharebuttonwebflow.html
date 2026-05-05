@@ -1,0 +1,104 @@
+<script>
+    function isMobile() {
+        return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    function shareToFacebook(link, title, description, image) {
+        let shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link);
+        if (title) {
+            shareUrl += '&title=' + encodeURIComponent(title);
+        }
+        if (description) {
+            shareUrl += '&description=' + encodeURIComponent(description);
+        }
+        if (image) {
+            shareUrl += '&picture=' + encodeURIComponent(image);
+        }
+        window.open(shareUrl, '_blank');
+    }
+
+    function shareToWhatsApp(link, title) {
+        let text = link;
+        if (title) {
+            text = title + '\n' + link;
+        }
+        window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+    }
+
+    function shareToThreads(link, title, image) {
+        let shareUrl = 'https://threads.net/intent/post?url=' + encodeURIComponent(link);
+        if (title) {
+            shareUrl += '&text=' + encodeURIComponent(title);
+        }
+        if (image) {
+            shareUrl += '&image_url=' + encodeURIComponent(image);
+        }
+        window.open(shareUrl, '_blank');
+    }
+
+    function shareToLinkedIn(link, title, description) {
+        let shareUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(link);
+        if (title) {
+            shareUrl += '&title=' + encodeURIComponent(title);
+        }
+        if (description) {
+            shareUrl += '&summary=' + encodeURIComponent(description);
+        }
+        if (isMobile()) {
+
+            window.location.href = 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(link) +
+
+                (title ? '&title=' + encodeURIComponent(title) : '') +
+                (description ? '&summary=' + encodeURIComponent(description) : '');
+
+        } else {
+
+            window.open(shareUrl, '_blank');
+
+        }
+    }
+
+    function shareToTwitter(link, title) {
+        let text = title + '\n' + link;
+        let shareUrl = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text);
+        window.open(shareUrl, '_blank');
+    }
+
+    function copyURL() {
+        navigator.clipboard.writeText(window.location.href)
+            .then(() => {
+                const toast = document.getElementById("toast");
+                toast.style.display = "block";
+                setTimeout(() => {
+                    toast.style.display = "none";
+                }, 2000);
+            })
+            .catch(err => console.error("Failed to copy:", err));
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const btns = document.querySelectorAll('[data-social]');
+        const link = window.location.href;
+        const title = document.querySelector('meta[property="og:title"]')?.getAttribute('content') || '';
+        const description = document.querySelector('meta[property="og:description"]')?.getAttribute('content') || '';
+        const image = document.querySelector('meta[property="og:image"]')?.getAttribute('content') || '';
+
+        btns.forEach(btn => {
+            btn.addEventListener('click', function(event) {
+                event.preventDefault();
+                const platform = btn.getAttribute('data-social');
+
+                if (platform === 'facebook') shareToFacebook(link, title, description, image);
+                else if (platform === 'whatsapp') shareToWhatsApp(link, title);
+                else if (platform === 'threads') shareToThreads(link, title, image);
+                else if (platform === 'linkedin') shareToLinkedIn(link, title, description);
+                else if (platform === 'twitter') shareToTwitter(link, title);
+            });
+        });
+
+        const copyLinkButton = document.getElementById("copyLink");
+        if (copyLinkButton) {
+            copyLinkButton.addEventListener("click", copyURL);
+        }
+    });
+</script>
